@@ -165,5 +165,16 @@ FileManager& Kernel::GetFileManager()
 
 User& Kernel::GetUser()
 {
-	return *(User*)USER_ADDRESS;
+	// return *(User*)USER_ADDRESS;
+	// 有一个前提就是user和核心栈始终是在一起的
+	// 因为esp指针始终是在栈内，由我们页表的设计方法可知
+	// 每一个页的大小都为4K , 
+	// 也就是说，我们通过屏蔽esp的低12位就能获得和PTE相同的作用
+	// 即得到当前页的起始地址
+	// 又因为user是和核心栈在同一个页内，且user在页的最上方
+	// 故仅需屏蔽低12位即可 
+	unsigned int user_address;
+	__asm__ __volatile__("movl %%esp , %0;":"+m"(user_address));
+	return *(User*)(user_address & 0xfffff000);
+
 }
