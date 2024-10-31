@@ -170,6 +170,10 @@ bool PEParser::HeaderLoad(Inode* p_inode)
 		ntHeader.OptionalHeader.BaseOfData + ntHeader.OptionalHeader.ImageBase;
 	this->DataSize = this->sectionHeaders[this->IDATA_SECTION_IDX].VirtualAddress - ntHeader.OptionalHeader.BaseOfData;
 
+	this->RDataAddress =
+		 this->sectionHeaders[this->DATA_SECTION_IDX].VirtualAddress - ntHeader.OptionalHeader.BaseOfData;
+	this->RDataSize = this->sectionHeaders[this->RDATA_SECTION_IDX].VirtualAddress - ntHeader.OptionalHeader.BaseOfData;
+
     StackSize = ntHeader.OptionalHeader.SizeOfStackCommit;
     HeapSize = ntHeader.OptionalHeader.SizeOfHeapCommit;
 

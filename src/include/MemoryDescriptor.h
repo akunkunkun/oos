@@ -65,6 +65,9 @@ public:
 	unsigned long	m_DataStartAddress; /* 数据段起始地址 */
 	unsigned long	m_DataSize;			/* 数据段长度 */
 
+	unsigned long	m_RDataStartAddress; /* 数据段起始地址 */
+	unsigned long	m_RDataSize;			/* 数据段长度 */
+
 	unsigned long	m_StackSize;		/* 栈段长度 */
 	//unsigned long	m_HeapSize;			/* 堆段长度 */
 };

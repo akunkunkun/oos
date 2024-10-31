@@ -148,6 +148,9 @@ public:
 	unsigned long DataAddress;
 	unsigned long DataSize;
 
+    unsigned long RDataAddress;
+    unsigned long RDataSize;
+    
 	unsigned long StackSize;
 	unsigned long HeapSize;
 

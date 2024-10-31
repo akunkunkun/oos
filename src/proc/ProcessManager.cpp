@@ -509,6 +509,10 @@ void ProcessManager::Exec()
 	/* 堆栈段初始化长度 */
 	u.u_MemoryDescriptor.m_StackSize = parser.StackSize;
 	
+	/* 只读数据段起始地址和长度*/
+	u.u_MemoryDescriptor.m_RDataStartAddress = parser.RDataAddress;
+	u.u_MemoryDescriptor.m_RDataSize = parser.RDataSize;
+
 	if ( parser.TextSize + parser.DataSize + parser.StackSize  + PageManager::PAGE_SIZE > MemoryDescriptor::USER_SPACE_SIZE - parser.TextAddress)
 	{
 		fileMgr.m_InodeTable->IPut(pInode);
@@ -627,7 +631,7 @@ void ProcessManager::Exec()
 		pText->x_ccount = 1;
 		pText->x_count = 1;
 		pText->x_iptr = pInode;
-		pText->x_size = u.u_MemoryDescriptor.m_TextSize;
+		pText->x_size = u.u_MemoryDescriptor.m_TextSize + u.u_MemoryDescriptor.m_RDataSize;
 		/* 为正文段分配内存，而具体正文段内容的读入需要等到建立页表映射之后，再从mapAddress地址起始的exe文件中读入 */
 		pText->x_caddr = userPgMgr.AllocMemory(pText->x_size);
 		pText->x_daddr = Kernel::Instance().GetSwapperManager().AllocSwap(pText->x_size);
