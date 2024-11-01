@@ -20,6 +20,7 @@ PEParser::PEParser(unsigned long peAddress)
 
 unsigned int PEParser::Relocate(Inode* p_inode, int sharedText)
 {
+
 	User& u = Kernel::Instance().GetUser();
 	unsigned long srcAddress, desAddress;
 	unsigned cnt = 0;
@@ -68,9 +69,14 @@ unsigned int PEParser::Relocate(Inode* p_inode, int sharedText)
 	else
 	// 修改正文段的读写标志，为内核写代码段做准备
 		i = 0;
-
+	
+	int j = 0;
+	if ( i == 1 ){
+		j = 1;
+	}
 	for ( ; i < this->BSS_SECTION_IDX; i++ )
 	{
+		
 		ImageSectionHeader* sectionHeader = &(this->sectionHeaders[i]);
 		srcAddress = sectionHeader->PointerToRawData;
 		desAddress =
@@ -106,7 +112,7 @@ unsigned int PEParser::Relocate()
 	unsigned long srcAddress, desAddress;
 	unsigned cnt = 0;
 
-	for (unsigned int i = 0; i < this->BSS_SECTION_IDX; i++ )
+	for (unsigned int i = 0; i <= this->BSS_SECTION_IDX; i++ )
 	{
 		ImageSectionHeader* sectionHeader = &(this->sectionHeaders[i]);
 		srcAddress = this->peAddress + sectionHeader->PointerToRawData;
@@ -170,9 +176,12 @@ bool PEParser::HeaderLoad(Inode* p_inode)
 		ntHeader.OptionalHeader.BaseOfData + ntHeader.OptionalHeader.ImageBase;
 	this->DataSize = this->sectionHeaders[this->IDATA_SECTION_IDX].VirtualAddress - ntHeader.OptionalHeader.BaseOfData;
 
-	this->RDataAddress = ntHeader.OptionalHeader.BaseOfData + ntHeader.OptionalHeader.ImageBase +
-		 this->sectionHeaders[this->DATA_SECTION_IDX].VirtualAddress - ntHeader.OptionalHeader.BaseOfData;
-	this->RDataSize = this->sectionHeaders[this->RDATA_SECTION_IDX].VirtualAddress - ntHeader.OptionalHeader.BaseOfData;
+	this->RDataAddress = ntHeader.OptionalHeader.BaseOfData + ntHeader.OptionalHeader.ImageBase + 
+		this->sectionHeaders[2].VirtualAddress - ntHeader.OptionalHeader.BaseOfData;
+	this->RDataSize = this->sectionHeaders[3].VirtualAddress - this->sectionHeaders[2].VirtualAddress;
+
+	this->DataSize -=  this->RDataSize;
+ 	this->TextSize += this->RDataSize;
 
     StackSize = ntHeader.OptionalHeader.SizeOfStackCommit;
     HeapSize = ntHeader.OptionalHeader.SizeOfHeapCommit;

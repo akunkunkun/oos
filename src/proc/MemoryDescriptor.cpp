@@ -41,6 +41,30 @@ unsigned int MemoryDescriptor::MapEntry(unsigned long virtualAddress, unsigned i
 	return phyPageIdx;
 }
 
+unsigned int MemoryDescriptor::MapEntry(unsigned long virtualAddress, unsigned int size, unsigned long phyPageIdx, bool isReadWrite,unsigned long virtualAddress2, unsigned int size2)
+{	
+	unsigned long address = virtualAddress - USER_SPACE_START_ADDRESS;
+	
+	//计算从pagetable的哪一个地址开始映射
+	unsigned long startIdx2 = (virtualAddress2 - USER_SPACE_START_ADDRESS)>> 12;
+	unsigned long cnt2 = ( size2 + (PageManager::PAGE_SIZE - 1) )/ PageManager::PAGE_SIZE;
+	unsigned long startIdx = address >> 12;
+	unsigned long cnt = ( size + (PageManager::PAGE_SIZE - 1) )/ PageManager::PAGE_SIZE;
+
+	PageTableEntry* entrys = (PageTableEntry*)this->m_UserPageTableArray;
+	for ( unsigned int i = startIdx; i < startIdx + cnt; i++  )
+	{
+		if ( i >= startIdx2 && i < startIdx2 + cnt2 )
+			continue;
+		entrys[i].m_Present = 0x1;
+		entrys[i].m_ReadWriter = isReadWrite;
+		entrys[i].m_PageBaseAddress = phyPageIdx;
+		phyPageIdx++;
+	}
+	return phyPageIdx;
+}
+
+
 void MemoryDescriptor::MapTextEntrys(unsigned long textStartAddress, unsigned long textSize, unsigned long textPageIdx)
 {
 	this->MapEntry(textStartAddress, textSize, textPageIdx, false);
@@ -102,10 +126,12 @@ bool MemoryDescriptor::EstablishUserPageTable( unsigned long textVirtualAddress,
 
 	/* 以相对起始地址phyPageIndex为1，ppda区占用1页4K大小物理内存，为数据段建立相对地址映照表 */
 	phyPageIndex = 1;
-	phyPageIndex = this->MapEntry(dataVirtualAddress, dataSize, phyPageIndex, true);
+	phyPageIndex = this->MapEntry(dataVirtualAddress, dataSize, phyPageIndex, true , m_RDataStartAddress, m_RDataSize);
+	
+	// 将只读数据段映射到正文段
 	Diagnose::Write("%d %d %d %d\n",dataVirtualAddress,dataSize,m_RDataStartAddress,m_RDataSize);
-
 	this->MapEntry(m_RDataStartAddress, m_RDataSize, conphyidx, false);
+
 	/* 紧跟着数据段之后，为堆栈段建立相对地址映照表 */
 	unsigned long stackStartAddress = (USER_SPACE_START_ADDRESS + USER_SPACE_SIZE - stackSize) & 0xFFFFF000;
 	this->MapEntry(stackStartAddress, stackSize, phyPageIndex, true);
