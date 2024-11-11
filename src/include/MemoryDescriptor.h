@@ -55,7 +55,8 @@ private:
 	 * bool isReadWrite:				页属性，true为可读可写页
 	 */
 	unsigned int MemoryDescriptor::MapEntry(unsigned long virtualAddress, unsigned int size, unsigned long phyPageIdx, bool isReadWrite);
-	
+	unsigned int MemoryDescriptor::MapEntry(unsigned long virtualAddress, unsigned int size, unsigned long phyPageIdx, bool isReadWrit,unsigned long virtualAddress2, unsigned int size2);
+
 public:
 	PageTable*		m_UserPageTableArray;
 	/* 以下数据都是线性地址 */

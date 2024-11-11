@@ -31,10 +31,13 @@ unsigned int PEParser::Relocate(Inode* p_inode, int sharedText)
 	PageTable* pUserPageTable = Machine::Instance().GetUserPageTableArray();
 	unsigned int textBegin = this->TextAddress >> 12 , textLength = this->TextSize >> 12;
 	PageTableEntry* pointer = (PageTableEntry *)pUserPageTable;
-
+	int j = 0;
 	/*如果与其它进程共享正文段，共享正文段切不可清0*/
-	if(sharedText == 1)
+	if(sharedText == 1){
 		i = 1;      // i是段头索引
+		j = 1;
+	}
+		
 	else
 	{
 		i = 0;
@@ -48,6 +51,8 @@ unsigned int PEParser::Relocate(Inode* p_inode, int sharedText)
     /* 对所有页面执行清0操作，这样bss变量的初值就是0 */
 	for (; i <= this->BSS_SECTION_IDX; i++ )
 	{
+		if (i == 2 && j == 1)
+			continue;
 		ImageSectionHeader* sectionHeader = &(this->sectionHeaders[i]);
 		int beginVM = sectionHeader->VirtualAddress + ntHeader.OptionalHeader.ImageBase;
 		int size = ((sectionHeader->Misc.VirtualSize + PageManager::PAGE_SIZE - 1)>>12)<<12;
@@ -70,13 +75,11 @@ unsigned int PEParser::Relocate(Inode* p_inode, int sharedText)
 	// 修改正文段的读写标志，为内核写代码段做准备
 		i = 0;
 	
-	int j = 0;
-	if ( i == 1 ){
-		j = 1;
-	}
+	
 	for ( ; i < this->BSS_SECTION_IDX; i++ )
 	{
-		
+		if ( i == 2 && j == 1)
+			continue;
 		ImageSectionHeader* sectionHeader = &(this->sectionHeaders[i]);
 		srcAddress = sectionHeader->PointerToRawData;
 		desAddress =

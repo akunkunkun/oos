@@ -649,6 +649,8 @@ void ProcessManager::Exec()
 	u.u_procp->Expand(newSize);
 
 	/* 根据正文段、数据段、堆栈段长度建立相对地址映照表，并加载到页表中 */
+	// Diagnose::Write("%d %d \n",parser.TextSize - parser.RDataSize,parser.DataSize + parser.RDataSize);
+
 	u.u_MemoryDescriptor.EstablishUserPageTable(parser.TextAddress, parser.TextSize - parser.RDataSize, parser.DataAddress, parser.DataSize + parser.RDataSize, parser.StackSize);
 
 	/* 从exe文件中依次读入.text段、.data段、.rdata段、.bss段 */

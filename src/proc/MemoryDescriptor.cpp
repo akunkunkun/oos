@@ -122,14 +122,14 @@ bool MemoryDescriptor::EstablishUserPageTable( unsigned long textVirtualAddress,
 	/* 以相对起始地址phyPageIndex为0，为正文段建立相对地址映照表 */
 	unsigned int phyPageIndex = 0;
 	unsigned int conphyidx = 0;
-	conphyidx = this->MapEntry(textVirtualAddress, textSize, phyPageIndex, false);
+	conphyidx = this->MapEntry(textVirtualAddress, m_TextSize - m_RDataSize, phyPageIndex, false);
 
 	/* 以相对起始地址phyPageIndex为1，ppda区占用1页4K大小物理内存，为数据段建立相对地址映照表 */
 	phyPageIndex = 1;
-	phyPageIndex = this->MapEntry(dataVirtualAddress, dataSize, phyPageIndex, true , m_RDataStartAddress, m_RDataSize);
+	phyPageIndex = this->MapEntry(dataVirtualAddress, m_DataSize + m_RDataSize, phyPageIndex, true , m_RDataStartAddress, m_RDataSize);
 	
 	// 将只读数据段映射到正文段
-	Diagnose::Write("%d %d %d %d\n",dataVirtualAddress,dataSize,m_RDataStartAddress,m_RDataSize);
+	//Diagnose::Write("%d %d %d %d %d\n",dataVirtualAddress,dataSize,m_RDataStartAddress,m_RDataSize,m_DataSize);
 	this->MapEntry(m_RDataStartAddress, m_RDataSize, conphyidx, false);
 
 	/* 紧跟着数据段之后，为堆栈段建立相对地址映照表 */
